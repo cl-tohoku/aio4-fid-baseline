@@ -44,12 +44,12 @@ declare -A QA_FILES
 for split in ${SPLITS[@]} ; do
   if [ $split = "train" ] ; then
     QA_FILES["train"]=$TRAIN_FILE
-  elif [ $target = "dev" ] ; then
+  elif [ $split = "dev" ] ; then
     QA_FILES["dev"]=$DEV_FILE
-  elif [ $target = "test" ] ; then
+  elif [ $split = "test" ] ; then
     QA_FILES["test"]=$TEST_FILE
   else
-    echo "[WARNING] '${target}' is not appropriate"
+    echo "[WARNING] '${split}' is not appropriate"
     echo "[WARNING] Please specify the target from {train, dev, test}"
   fi
 done

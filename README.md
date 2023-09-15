@@ -53,8 +53,8 @@
 
 ```bash
 # コマンド実行例
-$ git clone git@github.com:cl-tohoku/AIO4_FiD_baseline.git
-$ cd AIO4_FiD_baseline
+$ git clone git@github.com:cl-tohoku/aio4-fid-baseline.git
+$ cd aio4-fid-baseline
 ```
 
 
@@ -90,7 +90,7 @@ https://cloud.google.com/sdk/docs/install?hl=ja
 
 ```bash
 # 学習済みモデルのダウンロード
-$ bash scripts/download_models.sh
+$ bash download_models.sh
 $ du -h retrievers/DPR/models/baseline/*
   2.5G    biencoder.pt
   13G     embedding.pickle
@@ -160,12 +160,12 @@ $ bash scripts/download_data.sh $datasets_dir
 |  |- aio_02_train.tsv                   # 「質問」と「正解」からなる TSV 形式の訓練データ
 ```
 
-| データ             | ファイル名                                    |    質問数 |       文書数 |
-|:----------------|:-----------------------------------------|-------:|----------:|
-| 訓練              | aio\_02\_train                           | 22,335 |         - |
-| 開発              | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
-| リーダーボード投稿用評価データ | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
-| 文書集合            | jawiki-20220404-c400-large               |      - | 4,288,199 |
+| データ         | ファイル名                                    |    質問数 |       文書数 |
+|:------------|:-----------------------------------------|-------:|----------:|
+| 訓練          | aio\_02\_train                           | 22,335 |         - |
+| 開発          | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
+| リーダーボード用データ | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
+| 文書集合        | jawiki-20220404-c400-large               |      - | 4,288,199 |
 
 - データセットの構築方法の詳細については、[retrievers/DPR/data/README.md](retrievers/DPR/data/README.md)を参照して下さい。
 
@@ -195,13 +195,13 @@ $ vim scripts/configs/config.pth
 - データセットやモデルを任意の場所に保存した方は、上記設定ファイルに以下の項目を設定してください。
     - `WIKI_FILE`：Wikipedia の文書集合ファイル
     - `TRAIN_FILE`：第4回訓練データ（Retriever(=DPR)の訓練を行う場合に設定が必要な項目です）
-    - `DEV_FILE`：第4回開発データ
+    - `DEV_FILE`：第4回開発データ（問題のみ）
     - `TEST_FILE`：第4回リーダーボード用データ
     - `DIR_DPR`：モデルや文書エンベッディングが保存されているディレクトリへのパス
     - `DIR_RESULT`: 関連文書抽出結果の保存先
 
 下記のコマンドを実行することで、DPRがデータセットの質問に関連する文書を抽出します。
-なお、運営の実行環境（NVIDIA GeForce RTX 2080 Ti x1）では、第4回開発データに対する関連文書の抽出に1時間強を要しました。
+なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x3）では、第4回開発データに対する関連文書の抽出に1時間弱要しました。
 
 ```bash
 # 実行例
@@ -209,7 +209,7 @@ $ vim scripts/configs/config.pth
 $ exp_name="baseline"
 $ model="models/baseline/biencoder.pt"
 $ embed="models/baseline/embedding.pickle"
-$ targets="dev"  # {train, dev, test} から関連文書抽出対象を「スペースなしの ',' 区切り」で指定して下さい
+$ targets="dev"  # {train, dev, test} から関連文書抽出対象を「スペースなしの ',' 区切り」で指定してください
 
 $ bash scripts/retriever/retrieve_passage.sh \
     -n $exp_name \
@@ -224,10 +224,6 @@ $ ls ${DIR_RESULT}/${exp_name}/retrieved
     logs/
       predict_aio_pt.log                               # 実行時ログ
 ```
-
-__Acc@k__
-- 抽出した上位 k 件までの文書に解答が含まれている質問数の割合
-- 実行結果のtsvファイルをご参照ください
 
 <br>
 

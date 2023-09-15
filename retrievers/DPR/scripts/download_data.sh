@@ -24,10 +24,10 @@ wget -nc https://jaqket.s3.ap-northeast-1.amazonaws.com/data/aio_04/aio_04_test_
 # DPR
 mkdir -p $DEST/retriever
 curl -o $DEST/retriever/aio_02_train.json.gz -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/datasets.jawiki-20220404-c400-large.aio_02_train.jsonl.gz
-curl -o $DEST/retriever/aio_02_dev.json.gz -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/datasets.jawiki-20220404-c400-large.aio_02_dev.jsonl.gz
+# curl -o $DEST/retriever/aio_02_dev.json.gz -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/datasets.jawiki-20220404-c400-large.aio_02_dev.jsonl.gz
 
 curl -o $DEST/retriever/aio_02_train.tsv -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/dpr.qas.aio_02_train.tsv
-curl -o $DEST/retriever/aio_02_dev.tsv -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/dpr.qas.aio_02_dev.tsv
+# curl -o $DEST/retriever/aio_02_dev.tsv -OL https://github.com/cl-tohoku/quiz-datasets/releases/download/v1.0.0/dpr.qas.aio_02_dev.tsv
 
 # wikipedia
 mkdir -p $DEST/wiki
