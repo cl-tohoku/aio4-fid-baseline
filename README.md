@@ -315,7 +315,7 @@ $ du -h models_and_results/baseline/*
 #### 設定
 
 ```bash
-$ vim configs/test_generator_slud.yml
+$ vim configs/test_generator.yml
 ```
 
 - データセットなどを任意の場所に保存した方は、上記設定ファイルに以下の項目を設定して下さい。
@@ -333,11 +333,11 @@ $ vim configs/test_generator_slud.yml
 モデルが早押しボタンを押さないと判断した場合、解答として`null`が出力されます。
 - [scripts/test_generator.sh](generators/fusion_in_decoder/scripts/test_generator.sh)
 
-なお、運営の実行環境（NVIDIA GeForce GTX 1080 x1）では、第4回開発データに対する解答の生成に約5時間を要しました。
+なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x1）では、第4回開発データに対する解答の生成に約6時間半を要しました。
 
 ```bash
 # 実行例
-$ bash scripts/test_generator.sh configs/test_generator_slud.yml
+$ bash scripts/test_generator.sh configs/test_generator.yml
 
 # 実行結果
 $ ls ${checkpoint_dir}/${name}
@@ -346,6 +346,8 @@ $ ls ${checkpoint_dir}/${name}
 
 - 関連文書の上位 60 件の文書を用いた時の、第4回開発データに対する解答出力の例
 ```json lines
+# 例
+$ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
 {"qid": "AIO04-0001", "position": 1, "prediction": null}
 {"qid": "AIO04-0001", "position": 2, "prediction": null}
 {"qid": "AIO04-0001", "position": 3, "prediction": null}

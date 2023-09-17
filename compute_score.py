@@ -31,7 +31,7 @@ def normalize_answer(text: str) -> str:
     return text
 
 
-def get_all_gold_answers(gold_file: str) -> (dict[str, str], dict[str, str]):
+def get_all_gold_answers(gold_file: str) -> (dict, dict):
     all_questions: dict[str, str] = {}  # qid -> question
     all_gold_answers: dict[str, list[str]] = {}  # qid -> answers
     with open(gold_file) as f:
@@ -48,7 +48,7 @@ def get_all_gold_answers(gold_file: str) -> (dict[str, str], dict[str, str]):
     return all_gold_answers, all_questions
 
 
-def get_all_pred_answers(*, prediction_file: str = None, df: pd.DataFrame = None) -> dict[str, dict[int, str]]:
+def get_all_pred_answers(*, prediction_file: str = None, df: pd.DataFrame = None) -> dict:
     if prediction_file is not None and df is not None:
         raise ValueError("Only one of prediction_file or df should be specified.")
     if prediction_file is None and df is None:
@@ -67,7 +67,7 @@ def compute_scores(
         all_questions,
         all_pred_answers,
         limit_num_wrong_answers: int = None
-) -> dict[str, float]:
+) -> dict:
     num_questions = len(all_questions)
 
     # calculate scores]
@@ -120,7 +120,7 @@ def main(
         gold_file: str,
         prediction_file: str,
         limit_num_wrong_answers: int = None,
-) -> dict[str, float]:
+) -> dict:
     # load the gold file
     all_gold_answers, all_questions = get_all_gold_answers(gold_file)
     num_questions = len(all_questions)

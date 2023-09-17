@@ -18,9 +18,9 @@ DprRetrieved:
   path: JaqketAIO.load_jaqketaio2
   class: JaqketAIO
   data:
-#    train: retrievers/DPR/result/baseline/retrieved/train_aio_pt.json
-    dev: retrievers/DPR/result/baseline/retrieved/dev_aio_pt.json
-#    test: retrievers/DPR/result/baseline/retrieved/test_aio_pt.json
+#    train: retrievers/DPR/results/baseline/retrieved/train_aio_pt.json
+    dev: retrievers/DPR/results/baseline/retrieved/dev_aio_pt.json
+#    test: retrievers/DPR/results/baseline/retrieved/test_aio_pt.json
 
 Submission:
   path: JaqketAIO.load_jaqketaio2

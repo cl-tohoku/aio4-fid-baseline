@@ -109,10 +109,10 @@ DPR によって抽出された関連文書を用いて Fusion-in-Decoder モデ
 
 学習に必要なデータセットのパスを、事前に下記ファイルに設定して下さい。
 ```bash
-$ vim configs/train_generator_slud.yml
+$ vim configs/train_generator.yml
 ```
 
-- [configs/train_generator_slud.yml](configs/train_generator_slud.yml)
+- [configs/train_generator_slud.yml](configs/train_generator.yml)
     - `name`：訓練スクリプトの実行名
     - `train_data`：変換後の訓練用データセット（第4回訓練データ）
     - `eval_data`：変換後の開発用データセット（第4回開発データ）
@@ -135,21 +135,21 @@ $ vim configs/train_generator_slud.yml
 下記コマンドを実行することで、学習を実行します。
 
 ```bash
-$ bash scripts/train_generator.sh configs/train_generator_slud.yml
+$ bash scripts/train_generator.sh configs/train_generator.yml
 ```
 
 ### 評価
 
 解答の生成を行います。
 評価に必要なデータセットのパスを、事前に下記ファイルに設定して下さい。
-- [configs/test_generator_slud.yml](configs/test_generator_slud.yml)
+- [configs/test_generator_slud.yml](configs/test_generator.yml)
   - `name`：生成される解答テキストファイルの保存先
   - `eval_data`：評価したい変換後のデータセット（第4回開発データ、第4回リーダーボード評価データ）
   - `checkpoint_dir`：`name`ディレクトリが作成されるディレクトリのパス（デフォルト：使用する Reader モデルが保存されているディレクトリ）
   - `model_path`：使用する Reader モデルが保存されているディレクトリへのパス
 
 ```bash
-$ vim configs/test_generator_slud.yml
+$ vim configs/test_generator.yml
 ```
 
 ```bash
@@ -167,7 +167,7 @@ $ vim configs/test_generator_slud.yml
 
 下記コマンドを実行することで、解答の生成を行います。
 ```bash
-$ bash scripts/test_generator.sh configs/test_generator_slud.yml
+$ bash scripts/test_generator.sh configs/test_generator.yml
 ```
 
 

@@ -24,3 +24,4 @@ submission.sh
 retrievers/DPR/scripts/download_model.sh
 retrievers/DPR/scripts/retriever/retrieve_passage_of_dev.sh
 generators/fusion_in_decoder/scripts/download_*.sh
+generators/fusion_in_decoder/configs/submission_generator_slud.yml
