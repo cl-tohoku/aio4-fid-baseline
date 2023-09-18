@@ -1,6 +1,6 @@
-ARG BASE_IMAGE=python:3.8-slim-buster
+#ARG BASE_IMAGE=python:3.8-slim-buster
+ARG BASE_IMAGE=nvcr.io/nvidia/pytorch:21.06-py3
 FROM $BASE_IMAGE
-ARG BASE_IMAGE
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget \
         vim \
         curl \
+#        git-all \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -23,16 +24,6 @@ RUN pip install --no-cache-dir \
         "tensorboard==2.7.0" \
         "torch==1.9.1" \
         "Pillow==9.2.0"
-# Install apex
-RUN echo "Installing Apex on top of ${BASE_IMAGE}"
-WORKDIR /tmp/unique_for_apex
-RUN pip uninstall -y apex || :
-RUN pip uninstall -y apex || :
-# SHA is something the user can touch to force recreation of this Docker layer,
-# and therefore force cloning of the latest version of Apex
-RUN git clone https://github.com/NVIDIA/apex.git
-WORKDIR /tmp/unique_for_apex/apex
-RUN pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" .
 
 # Download transformers models in advance
 ARG TRANSFORMERS_BASE_MODEL_NAME="cl-tohoku/bert-base-japanese-whole-word-masking"

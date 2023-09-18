@@ -10,10 +10,10 @@ Fusion-in-Decoderは、質問と各関連文書を連結したものをエンコ
 ### 環境構築
 
 #### Dockerコンテナの起動
-`AIO4_FiD_baseline/generators/fusion_in_decoder`へ移動した後、下記のコマンドに従ってコンテナを起動してください。
+`aio4_fid_baseline/generators/fusion_in_decoder`にいる状態で、下記のコマンドに従ってコンテナを起動してください。
 ```bash
 $ docker image build --tag aio4_fid:fid .
-$ cd ../../  # "AIO4_FiD_baseline/."に移動してください
+$ cd ../../  # "aio4_fid_baseline/."に移動してください
 $ docker container run \
       --name train_fid \
       --rm \
@@ -27,10 +27,11 @@ $ docker container run \
 
 #### 設定
 
-cuda バージョンに合わせて torch v1.12.0 をインストールして下さい。
+- 次に、cuda バージョンに合わせて、以下より torch v1.13.1 をインストールしてください。
+  - https://pytorch.org
 ```bash
-# 実行例（CUDA 11.3 で pip を使用する場合）
-$ pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
+# 実行例（CUDA 11.7 で pip を使用する場合）
+$ pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
 ```
 
 
@@ -63,8 +64,15 @@ DprRetrieved:
 2. 次に、Fusion-in-Decoder 用にデータセット形式を変換します。
 
 ```bash
-$ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder
+$ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder -o "datasets/for_fid_training"
 ```
+
+変換後のデータセットは次のディレクトリに保存されます。
+
+```yaml
+/app/datasets/for_fid_training/fusion_in_decoder/DprRetrieved/*.jsonl
+```
+
 
 ### 形式
 以下のインスタンスからなる JSONL ファイルを使用します。
@@ -85,7 +93,7 @@ $ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder
 }
 ```
 
-リーダーボード投稿用評価データでは答えが含まれていないため、次のインスタンスからなる JSONL ファイルを使用します。
+リーダーボード用データでは答えが含まれていないため、次のインスタンスからなる JSONL ファイルを使用します。
 
 ```json
 {
@@ -107,6 +115,11 @@ $ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder
 DPR によって抽出された関連文書を用いて Fusion-in-Decoder モデルを学習します。
 - [scripts/train_generator.sh](scripts/train_generator.sh)
 
+まず、`aio4_fid_baseline/generators/fusion_in_decoder`に移動してください。
+```bash
+$ cd generators/fusion_in_decoder
+```
+
 学習に必要なデータセットのパスを、事前に下記ファイルに設定して下さい。
 ```bash
 $ vim configs/train_generator.yml
@@ -114,8 +127,8 @@ $ vim configs/train_generator.yml
 
 - [configs/train_generator_slud.yml](configs/train_generator.yml)
     - `name`：訓練スクリプトの実行名
-    - `train_data`：変換後の訓練用データセット（第4回訓練データ）
-    - `eval_data`：変換後の開発用データセット（第4回開発データ）
+    - `train_data`：変換後の訓練用データセット
+    - `eval_data`：変換後の開発用データセット
     - `checkpoint_dir`：`name`ディレクトリが配下に作成されるディレクトリ
     - `model_path`：学習したモデルファイルの保存先
     
@@ -124,8 +137,8 @@ $ vim configs/train_generator.yml
 - name: "fusion-in-decoder"
 
 # model
-- train_data: "/app/datasets/fusion_in_decoder/DprRetrieved/train.jsonl"
-- eval_data: "/app/datasets/fusion_in_decoder/DprRetrieved/dev.jsonl"
+- train_data: "/app/datasets/for_fid_training/fusion_in_decoder/DprRetrieved/train.jsonl"
+- eval_data: "/app/datasets/for_fid_training/fusion_in_decoder/DprRetrieved/dev.jsonl"
 - checkpoint_dir: "<checkpoint_dir>"
 
 # model 
@@ -144,7 +157,7 @@ $ bash scripts/train_generator.sh configs/train_generator.yml
 評価に必要なデータセットのパスを、事前に下記ファイルに設定して下さい。
 - [configs/test_generator_slud.yml](configs/test_generator.yml)
   - `name`：生成される解答テキストファイルの保存先
-  - `eval_data`：評価したい変換後のデータセット（第4回開発データ、第4回リーダーボード評価データ）
+  - `eval_data`：評価したい変換後のデータセット（開発データ、リーダーボード用データ）
   - `checkpoint_dir`：`name`ディレクトリが作成されるディレクトリのパス（デフォルト：使用する Reader モデルが保存されているディレクトリ）
   - `model_path`：使用する Reader モデルが保存されているディレクトリへのパス
 
@@ -157,8 +170,8 @@ $ vim configs/test_generator.yml
 - name: "fusion-in-decoder_test"
 
 # model
-- train_data: "/app/datasets/fusion_in_decoder/DprRetrieved/train.jsonl"
-- eval_data: "/app/datasets/fusion_in_decoder/DprRetrieved/test.jsonl"
+- train_data: "/app/datasets/for_fid_training/fusion_in_decoder/DprRetrieved/train.jsonl"
+- eval_data: "/app/datasets/for_fid_training/fusion_in_decoder/DprRetrieved/test.jsonl"
 - checkpoint_dir: "<checkpoint_dir>"
 
 # model 

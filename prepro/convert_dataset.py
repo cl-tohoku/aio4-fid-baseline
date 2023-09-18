@@ -43,23 +43,39 @@ class DataFormatter:
             with open(f"{dest}/{dtype}.jsonl", "w") as fo:
                 for instance in tqdm(dataset, desc=f"[{dtype}]"):
                     if instance["answers"]:
-                        obj = {
-                            "id": instance[keys["id"]],
-                            "position": instance["position"],
-                            "question": instance["question"],
-                            "target": instance["answers"][0],
-                            "answers": instance["answers"],
-                            "ctxs": instance["ctxs"]
-                        }
+                        if "position" in instance.keys():
+                            obj = {
+                                "id": instance[keys["id"]],
+                                "position": instance["position"],
+                                "question": instance["question"],
+                                "target": instance["answers"][0],
+                                "answers": instance["answers"],
+                                "ctxs": instance["ctxs"]
+                            }
+                        else:
+                            obj = {
+                                "id": instance[keys["id"]],
+                                "question": instance["question"],
+                                "target": instance["answers"][0],
+                                "answers": instance["answers"],
+                                "ctxs": instance["ctxs"]
+                            }
                     else:
-                        obj = {
-                            "id": instance[keys["id"]],
-                            "position": instance["position"],
-                            "question": instance["question"],
-                            "target": "",
-                            # "answers": [""],
-                            "ctxs": instance["ctxs"]
-                        }
+                        if "position" in instance.keys():
+                            obj = {
+                                "id": instance[keys["id"]],
+                                "position": instance["position"],
+                                "question": instance["question"],
+                                "target": "",
+                                "ctxs": instance["ctxs"]
+                            }
+                        else:
+                            obj = {
+                                "id": instance[keys["id"]],
+                                "question": instance["question"],
+                                "target": "",
+                                "ctxs": instance["ctxs"]
+                            }
                     #if all(o for o in obj.values()):
                     fo.write(json.dumps(obj, ensure_ascii=False) + "\n")
                 logger.info(f"write ... {fo.name}")
@@ -77,8 +93,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="To create future-aware corpus")
     parser.add_argument("data", type=str, help="key of datasets.yml")
-    parser.add_argument("format", choices=FORMAT, help="key of datasets.yml")
-    parser.add_argument("-o", "--output_dir", type=str, default="datasets", help="key of datasets.yml")
+    parser.add_argument("format", choices=FORMAT, help="")
+    parser.add_argument("-o", "--output_dir", type=str, default="datasets", help="")
     args = parser.parse_args()
     
     cfg_file = ROOT_REPOSITORY / "datasets.yml"

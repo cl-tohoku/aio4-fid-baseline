@@ -137,7 +137,7 @@ $ docker container run \
 
 
 ### ダウンロード
-第4回AI王コンペティションで配布されている訓練・開発・リーダーボード評価用クイズ問題、およびRetriever (Dense Passage Retrieval) の学習で使用するデータセット（訓練・開発用クイズ問題に Wikipedia の記事段落の付与を行ったもの）は、下記のコマンドで取得することができます。
+第4回AI王コンペティションで配布されている開発・リーダーボード評価用クイズ問題、およびRetriever (Dense Passage Retrieval) の学習で使用するデータセット（訓練・開発用クイズ問題に Wikipedia の記事段落の付与を行ったもの）は、下記のコマンドで取得することができます。
 <br>
 
 ```bash
@@ -149,23 +149,26 @@ $ bash scripts/download_data.sh $datasets_dir
 ```bash
 # ダウンロードされたデータセット
 <datasets_dir>
-|- aio_02_train.jsonl                    # 第4回DPR訓練データ（第2回のものと同じものです）
 |- aio_04_dev_unlabeled_v1.0.jsonl       # 第4回開発データ（問題のみ）
 |- aio_04_dev_v1.0.jsonl                 # 第4回開発データ（問題と正解）
 |- aio_04_test_lb_unlabeled_v1.0.jsonl   # 第4回リーダーボード用データ
 |- wiki/
 |  |- jawiki-20220404-c400-large.tsv.gz  # Wikipedia 文書集合
 |- retriever/
-|  |- aio_02_train.json.gz               # 第4回訓練データに Wikipedia の記事段落の付与を行ったもの
-|  |- aio_02_train.tsv                   # 「質問」と「正解」からなる TSV 形式の訓練データ
+|  |- aio_01_train.json.gz               # DPRの訓練データに Wikipedia の記事段落の付与を行ったもの
+|  |- aio_01_dev.json.gz
+|  |- aio_01_test.json.gz 
+|  |- aio_01_train.tsv                   # 「質問」と「正解」からなる TSV 形式の訓練データ
+|  |- aio_01_dev.tsv
+|  |- aio_01_test.tsv
 ```
 
-| データ         | ファイル名                                    |    質問数 |       文書数 |
-|:------------|:-----------------------------------------|-------:|----------:|
-| 訓練          | aio\_02\_train                           | 22,335 |         - |
-| 開発          | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
-| リーダーボード用データ | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
-| 文書集合        | jawiki-20220404-c400-large               |      - | 4,288,199 |
+| データ      | ファイル名                                    |    質問数 |       文書数 |
+|:---------|:-----------------------------------------|-------:|----------:|
+| DPR訓練用   | aio\_01\_train                           | 17,735 |         - |
+| 開発       | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
+| リーダーボード用 | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
+| 文書集合     | jawiki-20220404-c400-large               |      - | 4,288,199 |
 
 - データセットの構築方法の詳細については、[retrievers/DPR/data/README.md](retrievers/DPR/data/README.md)を参照して下さい。
 

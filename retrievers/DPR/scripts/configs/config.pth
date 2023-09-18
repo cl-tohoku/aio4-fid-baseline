@@ -1,6 +1,6 @@
 # data
 WIKI_FILE=datasets/wiki/jawiki-20220404-c400-large.tsv.gz
-TRAIN_FILE=datasets/aio_02_train.jsonl
+TRAIN_FILE=datasets/retriever/aio_01_train.json.gz
 DEV_FILE=datasets/aio_04_dev_unlabeled_v1.0.jsonl
 TEST_FILE=datasets/aio_04_test_lb_unlabeled_v1.0.jsonl
 

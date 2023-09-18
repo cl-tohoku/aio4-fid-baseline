@@ -18,35 +18,36 @@
 <br>
 
 ### ダウンロード
-第4回AI王コンペティションで配布されている訓練・開発・リーダーボード評価用セット、およびRetriever (Dense Passage Retrieval) の学習で使用するデータセット（訓練・開発用クイズ問題に Wikipedia の記事段落の付与を行ったもの）は、下記のコマンドにより取得することができます。
+第4回AI王コンペティションで配布されている開発・リーダーボード評価用セット、およびRetriever (Dense Passage Retrieval) の学習で使用するデータセット（訓練・開発用クイズ問題に Wikipedia の記事段落の付与を行ったもの）は、下記のコマンドにより取得することができます。
 <br>
 
 ```bash
-$ datasets_dir="datasets"
-$ bash scripts/download_data.sh $datasets_dir
-
+# ダウンロードされたデータセット
 <datasets_dir>
-|- aio_02_train.jsonl              # 第4回訓練セット
-|- aio_02_dev_v1.0.jsonl           # 第4回開発セット
-|- aio_03_test_unlabeled.jsonl     # 第4回リーダーボード評価セット
+|- aio_04_dev_unlabeled_v1.0.jsonl       # 第4回開発データ（問題のみ）
+|- aio_04_dev_v1.0.jsonl                 # 第4回開発データ（問題と正解）
+|- aio_04_test_lb_unlabeled_v1.0.jsonl   # 第4回リーダーボード用データ
 |- wiki/
 |  |- jawiki-20220404-c400-large.tsv.gz  # Wikipedia 文書集合
 |- retriever/
-|  |- aio_02_train.json.gz         # 第4回訓練セットに Wikipedia の記事段落の付与を行ったもの
-|  |- aio_02_dev.json.gz           # 第4回開発セットに Wikipedia の記事段落の付与を行ったもの
-|  |- aio_02_train.tsv             # 「質問」と「正解」からなる TSV 形式の訓練セット
-|  |- aio_02_dev.tsv               # 「質問」と「正解」からなる TSV 形式の開発セット
+|  |- aio_01_train.json.gz               # DPRの訓練データに Wikipedia の記事段落の付与を行ったもの
+|  |- aio_01_dev.json.gz
+|  |- aio_01_test.json.gz 
+|  |- aio_01_train.tsv                   # 「質問」と「正解」からなる TSV 形式の訓練データ
+|  |- aio_01_dev.tsv
+|  |- aio_01_test.tsv
 ```
 
 
 第4回AI王クイズ問題
 
-| データ             |ファイル名|質問数|       文書数 |
-|:----------------|:---|---:|----------:|
-| 訓練              |aio\_02\_train|22,335|         - |
-| 開発              |aio\_02\_dev\_v1.0|1,000|         - |
-| リーダーボード投稿用評価データ |aio\_03\_test\_unlabeled|1,000|         - |
-|文書集合|jawiki-20220404-c400-large|-| 4,288,199 |
+
+| データ         | ファイル名                                    |    質問数 |       文書数 |
+|:------------|:-----------------------------------------|-------:|----------:|
+| 訓練          | aio\_02\_train                           | 22,335 |         - |
+| 開発          | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
+| リーダーボード用データ | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
+| 文書集合        | jawiki-20220404-c400-large               |      - | 4,288,199 |
 
 - データセットの構築方法の詳細については、[data/README.md](data/README.md)を参照して下さい。
 
@@ -114,8 +115,12 @@ $ docker container run \
       aio4_fid:dpr \
       bash
 ```
-- 次に、cuda バージョンに合わせて、以下より torch v1.9.1 をインストールして下さい。
+- 次に、cuda バージョンに合わせて、以下より torch v1.13.1 をインストールしてください。
   - https://pytorch.org
+```bash
+# 実行例（CUDA 11.7 で pip を使用する場合）
+$ pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
+```
 
 
 ### 設定
@@ -127,7 +132,7 @@ $ vim scripts/configs/config.pth
 - 実装を始める前に、上記設定ファイルに以下の項目を設定して下さい。
     - `WIKI_FILE`：Wikipedia の文書ファイル
     - `TRAIN_FILE`：訓練セット
-    - `DEV_FILE`：開発セット
+    - `DEV_FILE`：開発セット（問題と正解を含むもの）
     - `TEST_FILE`：評価セット
     - `DIR_DPR`：モデルや文書エンベッディングが保存されているディレクトリへのパス
 
@@ -229,8 +234,3 @@ $ ls ${DIR_RESULT}/${exp_name}/retrieved
 __Acc@k__
 - 抽出した上位 k 件までの文書に解答が含まれている質問数の割合
 - 実行結果のtsvファイルをご参照ください
-
-| データ      | Acc@1 | Acc@5 | Acc@10 | Acc@50 | Acc@100 |
-|:---------|------:|------:|-------:|-------:|--------:|
-| 第4回訓練データ | 51.76 | 76.07 |  81.93 |  89.25 |   90.89 |
-| 第4回開発データ |  42.2 |  67.8 |   73.3 |      85 |      88 |
