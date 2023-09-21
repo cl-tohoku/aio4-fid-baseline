@@ -82,11 +82,7 @@ $ cd aio4-fid-baseline
 ## 学習済みモデルのダウンロード
 本ベースラインでは、クイズに対する関連文書を検索するためのDPR(Dense Passage Retrieval)と、検索された関連文書から解答を生成するためのFiD(Fusion-in-Decoder)の学習済みモデルの配布を行っています。
 
-学習済みモデルは下記のコマンドでダウンロードすることができますが、その際に gcloud CLI コマンド を使用するため、Google Cloud CLI のインストールが必要です。
-
-そのため、下記ダウンロードコマンドを実行する際には、事前に以下のページの指示に従い、お使いの環境に応じて Google Cloud CLI をインストールしてください。
-
-https://cloud.google.com/sdk/docs/install?hl=ja
+学習済みモデルは下記のコマンドでダウンロードすることができます。
 
 ```bash
 # 学習済みモデルのダウンロード
@@ -97,7 +93,7 @@ $ du -h retrievers/DPR/models/baseline/*
 $ du -h generators/fusion_in_decoder/models_and_results/baseline/*
   4.0K    config.json
   1.7G    optimizer.pth.tar
-  851M    pytorch_model.bin
+  855M    pytorch_model.bin
 ```
 
 

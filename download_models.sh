@@ -13,17 +13,19 @@ if [ ! -z $1 ] ; then
   exit 1
 fi
 
-# DPR models
+# Download models
 echo "- Download: retriever(DPR)"
-gcloud storage cp gs://aio4_fid_baseline_test/DPR_baseline_model/biencoder.pt.gz $DPR_DEST/biencoder.pt.gz
-echo "- Download: embeddings"
-gcloud storage cp gs://aio4_fid_baseline_test/DPR_baseline_model/embedding.pickle.gz $DPR_DEST/embedding.pickle.gz
+wget -nc https://storage.googleapis.com/aio-public-tokyo/aio4_fid_baseline_models/DPR_baseline_model/biencoder.pt.gz -O $DPR_DEST/biencoder.pt.gz
 
-# FiD models
+echo "- Download: embeddings"
+wget -nc https://storage.googleapis.com/aio-public-tokyo/aio4_fid_baseline_models/DPR_baseline_model/embedding.pickle.gz -O $DPR_DEST/embedding.pickle.gz
+
 echo "- Download: reader(FiD)"
-gcloud storage cp gs://aio4_fid_baseline_test/FiD_baseline_model/config.json $FiD_DEST/config.json
-gcloud storage cp gs://aio4_fid_baseline_test/FiD_baseline_model/optimizer.pth.tar.gz $FiD_DEST/optimizer.pth.tar.gz
-gcloud storage cp gs://aio4_fid_baseline_test/FiD_baseline_model/pytorch_model.bin.gz $FiD_DEST/pytorch_model.bin.gz
+wget -nc https://storage.googleapis.com/aio-public-tokyo/aio4_fid_baseline_models/FiD_baseline_model/config.json -O $FiD_DEST/config.json
+
+wget -nc https://storage.googleapis.com/aio-public-tokyo/aio4_fid_baseline_models/FiD_baseline_model/optimizer.pth.tar.gz -O $FiD_DEST/optimizer.pth.tar.gz
+
+wget -nc https://storage.googleapis.com/aio-public-tokyo/aio4_fid_baseline_models/FiD_baseline_model/pytorch_model.bin.gz -O $FiD_DEST/pytorch_model.bin.gz
 
 # unzipping
 echo "- Unzip: DPR model"
