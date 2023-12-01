@@ -155,11 +155,3 @@ if __name__ == "__main__":
     print("accuracy_score: {:.3f}".format(scores["accuracy_score"]))
     print("position_score: {:.3f}".format(scores["position_score"]))
     print("total_score: {:.3f}".format(scores["total_score"]))
-
-
-    # Japansese
-    "これは日本語の文章です"
-    "最終評価におけるAPI利用に対応した"
-    # Translated English
-    "This is a Japanese sentence"
-    "Corresponding to API use in the final evaluation"
