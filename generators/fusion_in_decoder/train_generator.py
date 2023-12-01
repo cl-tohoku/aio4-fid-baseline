@@ -19,12 +19,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-from fid.options import Options
-from fid.data import set_data, Collator
-from fid.model import FiDT5
-from fid.evaluation import calc_em
-import fid.slurm
-from fid import util
+from generators.fusion_in_decoder.fid.options import Options
+from generators.fusion_in_decoder.fid.data import set_data, Collator
+from generators.fusion_in_decoder.fid.model import FiDT5
+from generators.fusion_in_decoder.fid.evaluation import calc_em
+import generators.fusion_in_decoder.fid.slurm
+from generators.fusion_in_decoder.fid import util
 
 
 DATETIME = dt.now().strftime("%Y%m%d-%H%M")
@@ -152,7 +152,7 @@ def evaluate(args, dataset, collator, tokenizer, model):
                 eval_em.append(calc_em(pred, gold))
                 total += 1
 
-    eval_em, total = fid.util.weighted_average(np.mean(eval_em), total, args)
+    eval_em, total = generators.fusion_in_decoder.fid.util.weighted_average(np.mean(eval_em), total, args)
     return eval_em
 
 
@@ -166,8 +166,8 @@ if __name__ == "__main__":
     if args.is_distributed:
         torch.distributed.barrier()
     torch.manual_seed(args.seed)
-    fid.slurm.init_distributed_mode(args)
-    fid.slurm.init_signal_handler()
+    generators.fusion_in_decoder.fid.slurm.init_distributed_mode(args)
+    generators.fusion_in_decoder.fid.slurm.init_signal_handler()
 
     # Tokenizer & Model
     tokenizer = T5Tokenizer.from_pretrained(args.model_name_or_path)

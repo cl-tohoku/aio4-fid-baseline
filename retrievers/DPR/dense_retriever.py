@@ -28,9 +28,9 @@ import torch
 from torch import Tensor as T
 from torch import nn
 
-from dpr.data.qa_validation import calculate_matches
-from dpr.models import init_biencoder_components
-from dpr.options import (
+from retrievers.DPR.dpr.data.qa_validation import calculate_matches
+from retrievers.DPR.dpr.models import init_biencoder_components
+from retrievers.DPR.dpr.options import (
     add_encoder_params,
     setup_args_gpu,
     print_args,
@@ -38,17 +38,17 @@ from dpr.options import (
     add_tokenizer_params,
     add_cuda_params
 )
-from dpr.utils.data_utils import (
+from retrievers.DPR.dpr.utils.data_utils import (
     Tensorizer,
     read_qas,
     read_ctxs
 )
-from dpr.utils.model_utils import (
+from retrievers.DPR.dpr.utils.model_utils import (
     setup_for_distributed_mode,
     get_model_obj,
     load_states_from_checkpoint
 )
-from dpr.indexer.faiss_indexers import (
+from retrievers.DPR.dpr.indexer.faiss_indexers import (
     DenseIndexer,
     DenseHNSWFlatIndexer,
     DenseFlatIndexer
@@ -180,10 +180,13 @@ def validate(passages: Dict[object, Tuple[str, str]], answers: List[List[str]],
     logger.info('Validation results: top k documents hits %s', top_k_hits)
     logger.info('Validation results: top k documents hits accuracy %s', top_k_acc)
 
-    pd.DataFrame({'top_k':range(1,len(top_k_hits)+1) ,'n_hits':top_k_hits, 'acc':top_k_acc})\
-        .astype({'top_k':int, 'n_hits': int})\
-        .set_index('top_k')\
-        .to_csv(open(fo_acc, 'w') if fo_acc is not None else sys.stdout, sep='\t', header=True, index=True)
+    if fo_acc:
+        pd.DataFrame({'top_k':range(1,len(top_k_hits)+1) ,'n_hits':top_k_hits, 'acc':top_k_acc})\
+            .astype({'top_k':int, 'n_hits': int})\
+            .set_index('top_k')\
+            .to_csv(open(fo_acc, 'w') if fo_acc is not None else sys.stdout, sep='\t', header=True, index=True)
+    else:
+        logger.info('Skipped writing validation results to file. fo_acc is %s.', fo_acc)
 
     return match_stats.questions_doc_hits
 
@@ -230,9 +233,12 @@ def save_results(passages: Dict[object, Tuple[str, str]], qids: List[str], posit
             ]
         })
 
-    with open(out_file, "w") as writer:
-        writer.write(json.dumps(merged_data, indent=4, ensure_ascii=False) + "\n")
-    logger.info('Saved results * scores  to %s', out_file)
+    if out_file:
+        with open(out_file, "w") as writer:
+            writer.write(json.dumps(merged_data, indent=4, ensure_ascii=False) + "\n")
+        logger.info('Saved results * scores  to %s', out_file)
+    else:
+        return merged_data
 
 
 def iterate_encoded_files(vector_files: list) -> Iterator[Tuple[object, np.array]]:
@@ -353,7 +359,6 @@ def main():
         save_results(
             all_passages, qids, positions, questions, question_answers, top_ids_and_scores, questions_doc_hits, args.out_file
         )
-
 
 
 if __name__ == '__main__':

@@ -28,13 +28,13 @@ import torch
 from torch import nn
 from torch import Tensor as T
 
-from dpr.models import init_biencoder_components
-from dpr.models.biencoder import (
+from retrievers.DPR.dpr.models import init_biencoder_components
+from retrievers.DPR.dpr.models.biencoder import (
     BiEncoder,
     BiEncoderNllLoss,
     BiEncoderBatch
 )
-from dpr.options import (
+from retrievers.DPR.dpr.options import (
     add_encoder_params,
     add_training_params,
     override_args,
@@ -45,13 +45,13 @@ from dpr.options import (
     add_tokenizer_params,
     set_encoder_params_from_state
 )
-from dpr.utils.data_utils import (
+from retrievers.DPR.dpr.utils.data_utils import (
     ShardedDataIterator,
     read_data_from_json_files,
     Tensorizer
 )
-from dpr.utils.dist_utils import all_gather_list
-from dpr.utils.model_utils import (
+from retrievers.DPR.dpr.utils.dist_utils import all_gather_list
+from retrievers.DPR.dpr.utils.model_utils import (
     setup_for_distributed_mode,
     move_to_device,
     get_schedule_linear,

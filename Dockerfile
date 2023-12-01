@@ -20,9 +20,11 @@ RUN pip install --no-cache-dir \
         "certifi==2022.6.15" \
         "charset-normalizer==2.1.0" \
         "click==8.1.3" \
+        "datasets==2.6.2" \
         "decorator==5.1.1" \
         "executing==0.8.3" \
         "faiss-gpu==1.7.2" \
+        "fastapi==0.85.2" \
         "filelock==3.7.1" \
         "fugashi==1.1.2" \
         "google-auth==2.9.1" \
@@ -78,6 +80,7 @@ RUN pip install --no-cache-dir \
         "typing-extensions==4.3.0" \
         "unidic-lite==1.0.8" \
         "urllib3==1.26.10" \
+        "uvicorn==0.15.0" \
         "wcwidth==0.2.5" \
         "werkzeug==2.1.2" \
         "wheel==0.37.1" \
@@ -91,11 +94,13 @@ RUN python -c "from transformers import BertModel; BertModel.from_pretrained('${
 RUN python -c "from transformers import BertJapaneseTokenizer; BertJapaneseTokenizer.from_pretrained('${TRANSFORMERS_BASE_MODEL_NAME}')"
 ARG T5_TOKENIZER_NAME="sonoisa/t5-base-japanese"
 RUN python -c "from transformers import T5Tokenizer; T5Tokenizer.from_pretrained('${T5_TOKENIZER_NAME}')"
-# ENV TRANSFORMERS_OFFLINE=1
+ENV TRANSFORMERS_OFFLINE=1
 
 WORKDIR /app
 COPY generators/ /app/generators/
 COPY prepro/ /app/prepro/
 COPY retrievers/ /app/retrievers/
 COPY datasets.yml /app/.
-COPY submission.sh /app/.
+
+WORKDIR /app
+CMD ["uvicorn", "prediction_api:app", "--host", "0.0.0.0", "--port", "8000"]

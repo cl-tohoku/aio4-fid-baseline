@@ -80,7 +80,7 @@ def compute_scores(
         pred_answers = all_pred_answers[qid]  # position -> pred_answer
         gold_answers = all_gold_answers[qid]
 
-        correct_position: int | None = None  # the earliest position of the correct predictions
+        correct_position = None  # the earliest position of the correct predictions
         wrong_answers = set()
         for position, pred_answer in sorted(pred_answers.items(), key=lambda x: x[0]):
             if pred_answer in gold_answers:
@@ -155,3 +155,11 @@ if __name__ == "__main__":
     print("accuracy_score: {:.3f}".format(scores["accuracy_score"]))
     print("position_score: {:.3f}".format(scores["position_score"]))
     print("total_score: {:.3f}".format(scores["total_score"]))
+
+
+    # Japansese
+    "これは日本語の文章です"
+    "最終評価におけるAPI利用に対応した"
+    # Translated English
+    "This is a Japanese sentence"
+    "Corresponding to API use in the final evaluation"

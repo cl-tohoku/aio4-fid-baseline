@@ -16,12 +16,12 @@ from torch.utils.data import DataLoader, SequentialSampler
 
 from transformers import T5Tokenizer
 
-from fid.options import Options
-from fid.data import set_data, Collator
-from fid.model import FiDT5
-from fid.evaluation import calc_em
-import fid.slurm
-from fid import util
+from generators.fusion_in_decoder.fid.options import Options
+from generators.fusion_in_decoder.fid.data import set_data, Collator
+from generators.fusion_in_decoder.fid.model import FiDT5
+from generators.fusion_in_decoder.fid.evaluation import calc_em
+import generators.fusion_in_decoder.fid.slurm
+from generators.fusion_in_decoder.fid import util
 
 
 DATETIME = dt.now().strftime("%Y%m%d-%H%M")
@@ -85,11 +85,13 @@ def evaluate(args, dataset, collator, tokenizer, model):
                             f"sequences_prob: {torch.exp(outputs.sequences_scores[bix]) * 100}"
                             )
 
-                # 文生成スコアから算出される生成確率が事前に設定した閾値以下である、または空文字が解答候補の場合は、強制的に「null」を生成する
+                # 文生成スコアから算出される生成確率が事前に設定した閾値以下である、または空文字が解答候補の場合は"None"にする
                 if (torch.exp(outputs.sequences_scores[bix])*100 < args.threshold_probability) or (not tokenizer.decode(output, skip_special_tokens=True)):
-                    pred = "null"
+                    pred = None
                 else:
-                    pred = '"' + tokenizer.decode(output, skip_special_tokens=True) + '"'
+                    pred = tokenizer.decode(output, skip_special_tokens=True)
+
+                reader_prediction = {"pred_answer": pred, "score": torch.exp(outputs.sequences_scores[bix])*100}
 
                 example = dataset.data[qids[bix]]
                 if "answers" in example:
@@ -98,6 +100,8 @@ def evaluate(args, dataset, collator, tokenizer, model):
 
                 if args.write_results:
                     fw.write(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}\n')
+                else:
+                    print(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}')
                 if args.write_crossattention_scores:
                     for j in range(passage_ids.size(1)):
                         example["ctxs"][j]["score"] = crossattention_scores[bix, j].item()
@@ -116,9 +120,9 @@ def evaluate(args, dataset, collator, tokenizer, model):
         logger.info(f"average = {ave_em:.6f}")
         score, total = util.weighted_average(ave_em, total, args)
         logger.info(f"EM {score:.6f}, Total number of example {total}")
-        return score, total
+        return score, total, reader_prediction
     else:
-        return 0.0, total
+        return 0.0, total, reader_prediction
 
 
 if __name__ == "__main__":
@@ -129,8 +133,8 @@ if __name__ == "__main__":
     
     if args.is_distributed:
         torch.distributed.barrier()
-    fid.slurm.init_distributed_mode(args)
-    fid.slurm.init_signal_handler()
+    generators.fusion_in_decoder.fid.slurm.init_distributed_mode(args)
+    generators.fusion_in_decoder.fid.slurm.init_signal_handler()
 
     # Tokenizer & Model
     tokenizer = T5Tokenizer.from_pretrained(args.model_name_or_path)
@@ -144,7 +148,7 @@ if __name__ == "__main__":
     set_data_fn = set_data(global_rank=args.global_rank, world_size=args.world_size)
     eval_dataset = set_data_fn(args.eval_data, args.n_context)
 
-    em, total = evaluate(
+    em, total, reader_prediction = evaluate(
         args,
         eval_dataset, collator,
         tokenizer, model

@@ -4,6 +4,7 @@
 
 ## 更新履歴
 - 2023/09/15: 本ベースラインを公開しました。
+- 2023/12/01: 最終投稿方法（API利用）に対応しました。これに伴い、
 
 
 ## 目次
@@ -77,6 +78,8 @@ $ cd aio4-fid-baseline
   
 - download_models.sh:                  学習済みモデルのダウンロードスクリプト
 - compute_score.py:                    評価スクリプト
+- evaluate_docker_api.py:              最終提出時に用いる評価スクリプト
+- prediction_api.py:                   最終提出時に用いる予測スクリプト
 ```
 
 ## 学習済みモデルのダウンロード
@@ -114,6 +117,7 @@ $ docker container run \
       aio4_fid:latest \
       bash
 ```
+- なお、運営の環境では Docker イメージのビルドに約1時間を要しました。
 
 
 ## Retriever (Dense Passage Retrieval)
@@ -200,17 +204,19 @@ $ vim scripts/configs/config.pth
     - `DIR_RESULT`: 関連文書抽出結果の保存先
 
 下記のコマンドを実行することで、DPRがデータセットの質問に関連する文書を抽出します。
-なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x3）では、第4回開発データに対する関連文書の抽出に1時間弱要しました。
+なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x3）では、第4回開発データに対する関連文書の抽出に1時間弱を要しました。
 
 ```bash
-# 実行例
+# ディレクトリの移動
+$ cd /app
 
+# 実行例
 $ exp_name="baseline"
-$ model="models/baseline/biencoder.pt"
-$ embed="models/baseline/embedding.pickle"
+$ model="retrievers/DPR/models/baseline/biencoder.pt"
+$ embed="retrievers/DPR/models/baseline/embedding.pickle"
 $ targets="dev"  # {train, dev, test} から関連文書抽出対象を「スペースなしの ',' 区切り」で指定してください
 
-$ bash scripts/retriever/retrieve_passage.sh \
+$ bash retrievers/DPR/scripts/retriever/retrieve_passage.sh \
     -n $exp_name \
     -m $model \
     -e $embed \
@@ -238,7 +244,6 @@ Fusion-in-Decoder(FiD) は、質問と各関連文書を連結したものをエ
 前節のRetrieverによる関連文書抽出結果を任意の場所に保存した方は、[/app/datasets.yml](datasets.yml) ファイルを編集して下さい。
 
 ```bash
-$ cd /app
 $ vim datasets.yml
 ```
 
@@ -335,8 +340,11 @@ $ vim configs/test_generator.yml
 なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x1）では、第4回開発データに対する解答の生成に約6時間半を要しました。
 
 ```bash
+# ディレクトリの移動
+$ cd /app
+
 # 実行例
-$ bash scripts/test_generator.sh configs/test_generator.yml
+$ bash generators/fusion_in_decoder/scripts/test_generator.sh configs/test_generator.yml
 
 # 実行結果
 $ ls ${checkpoint_dir}/${name}
@@ -344,7 +352,7 @@ $ ls ${checkpoint_dir}/${name}
 ```
 
 - 関連文書の上位 60 件の文書を用いた時の、第4回開発データに対する解答出力の例
-```json lines
+```bash
 # 例
 $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
 {"qid": "AIO04-0001", "position": 1, "prediction": null}
@@ -361,7 +369,7 @@ $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
 ```bash
 $ cd ../../
 $ python compute_score.py \
-      --prediction_file generators/fusion_in_decoder/${checkpoint_dir}/${name}/final_output.jsonl \
+      --prediction_file ${checkpoint_dir}/${name}/final_output.jsonl \
       --gold_file retrievers/DPR/datasets/aio4/aio_04_dev_v1.0.jsonl \
       --limit_num_wrong_answers 3
 ```
@@ -394,6 +402,35 @@ $ python compute_score.py \
 - `total_score`：総合得点（`accuracy_score`と`position_score`の総和）
 
 スコアの詳細については、第4回AI王 web サイトの早押し解答部門「スコアの算出方法」もご参照ください。
+
+
+### Dockerを用いた最終提出の準備
+
+- まず、以下の手順を参考にDockerコンテナを起動します。
+```bash
+# "aio4-fid-baseline"ディレクトリに移動する
+$ cd {path_of_the_cloned_directory}/aio4-fid-baseline
+$ mkdir data
+# Docker イメージのビルド
+$ docker image build --tag aio4_fid:latest .
+$ docker container run \
+      --name fid_baseline \
+      --rm \
+      --interactive \
+      --tty \
+      --gpus all \
+      --publish 8000:8000 \
+      --mount type=bind,src=$(pwd),dst=/app \
+      aio4_fid:latest \
+      bash
+```
+
+-次に、第4回AI王のリーダーボード用データに対して、下記のコマンドで解答ファイルが生成できることを確認します。
+```bash
+$ python3 -m evaluate_docker_api \
+  --test_unlabelded_file data/aio_04_test_lb_unlabeled_v1.0.jsonl \
+  --output_prediction_file work/aio_04_test_lb_prediction_v1.0.jsonl
+```
 
 
 

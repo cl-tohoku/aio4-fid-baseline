@@ -39,7 +39,7 @@ class Options():
         self.parser.add_argument("--write_results", action="store_true", help="save results")
         self.parser.add_argument("--write_crossattention_scores", action="store_true", 
                         help="save dataset with cross-attention scores")
-        self.parser.add_argument("--threshold_probability", type=float, default=79.0,
+        self.parser.add_argument("--threshold_probability", type=float, default=85.0,
                                  help="output answers when outputs.sequences_scores surpass this threshold")
 
     def add_interact_options(self):

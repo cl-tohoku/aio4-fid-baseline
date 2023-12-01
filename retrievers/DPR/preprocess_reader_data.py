@@ -11,9 +11,9 @@
 import argparse
 import logging
 
-from dpr.data.reader_data import convert_retriever_results
-from dpr.models import init_tenzorizer
-from dpr.options import print_args, add_encoder_params, add_reader_preprocessing_params, add_tokenizer_params
+from retrievers.DPR.dpr.data.reader_data import convert_retriever_results
+from retrievers.DPR.dpr.models import init_tenzorizer
+from retrievers.DPR.dpr.options import print_args, add_encoder_params, add_reader_preprocessing_params, add_tokenizer_params
 
 logger = logging.getLogger()
 

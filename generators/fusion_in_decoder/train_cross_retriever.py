@@ -17,13 +17,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 from transformers import BertTokenizerFast, BertJapaneseTokenizer
 
-from fid.options import Options
-from fid.data import RetrieverCollator, set_data
-from fid.model import RetrieverConfig, Retriever
-from fid.options import Options
-from fid.evaluation import eval_batch
-import fid.slurm
-from fid import util
+from generators.fusion_in_decoder.fid.options import Options
+from generators.fusion_in_decoder.fid.data import RetrieverCollator, set_data
+from generators.fusion_in_decoder.fid.model import RetrieverConfig, Retriever
+from generators.fusion_in_decoder.fid.options import Options
+from generators.fusion_in_decoder.fid.evaluation import eval_batch
+import generators.fusion_in_decoder.fid.slurm
+from generators.fusion_in_decoder.fid import util
 
 
 DATETIME = dt.now().strftime("%Y%m%d-%H%M")
@@ -165,8 +165,8 @@ if __name__ == "__main__":
     if args.is_distributed:
         torch.distributed.barrier()
     torch.manual_seed(args.seed)
-    fid.slurm.init_distributed_mode(args)
-    fid.slurm.init_signal_handler()
+    generators.fusion_in_decoder.fid.slurm.init_distributed_mode(args)
+    generators.fusion_in_decoder.fid.slurm.init_signal_handler()
 
     # Tokenizer & Model
     BertClass = BertJapaneseTokenizer if "japanese" in args.model_name_or_path.lower() else BertTokenizerFast

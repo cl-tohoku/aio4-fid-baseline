@@ -23,7 +23,7 @@ from transformers import BertJapaneseTokenizer
 from transformers import RobertaTokenizer
 
 
-from dpr.utils.data_utils import Tensorizer
+from retrievers.DPR.dpr.utils.data_utils import Tensorizer
 from .biencoder import BiEncoder
 from .reader import Reader
 

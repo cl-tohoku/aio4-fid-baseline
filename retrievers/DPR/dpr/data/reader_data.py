@@ -22,7 +22,7 @@ import torch
 from torch import Tensor as T
 from tqdm import tqdm
 
-from dpr.utils.data_utils import Tensorizer
+from retrievers.DPR.dpr.utils.data_utils import Tensorizer
 
 logger = logging.getLogger()
 

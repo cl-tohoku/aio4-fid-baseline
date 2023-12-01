@@ -19,7 +19,7 @@ from typing import Tuple, List, Dict
 
 import regex as re
 
-from dpr.utils.tokenizers import SimpleTokenizer
+from retrievers.DPR.dpr.utils.tokenizers import SimpleTokenizer
 
 logger = logging.getLogger(__name__)
 

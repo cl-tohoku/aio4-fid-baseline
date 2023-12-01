@@ -18,10 +18,16 @@ def set_data(data, n_context, global_rank=-1, world_size=-1):
 
 
 def load_data(fi_data, global_rank=-1, world_size=-1):
-    if fi_data.endswith(".jsonl"):
-        data = [json.loads(line.strip()) for line in open(fi_data)]
-    elif fi_data.endswith(".json"):
-        data = json.load(open(fi_data))
+    if type(fi_data) == str:
+        if fi_data.endswith(".jsonl"):
+            data = [json.loads(line.strip()) for line in open(fi_data)]
+        elif fi_data.endswith(".json"):
+            data = json.load(open(fi_data))
+    elif type(fi_data) == list:
+        if all((key in fi_data[0].keys()) for key in ["id", "position", "question", "target", "ctxs"]):
+            data = fi_data
+        else:
+            raise ValueError("data should have keys: 'id', 'position', 'question', 'target', 'ctxs'")
     else:
         raise ValueError("data file should be endswith((json, jsonl))")
     examples = []
