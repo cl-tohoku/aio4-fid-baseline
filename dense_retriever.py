@@ -12,7 +12,6 @@
 import argparse
 import csv
 import glob
-import gzip
 import json
 import logging
 import os

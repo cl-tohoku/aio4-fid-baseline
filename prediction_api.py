@@ -2,17 +2,13 @@ import logging
 
 import torch
 from fastapi import FastAPI
-import argparse
 import glob
 import os
 
 from retrievers.DPR.dpr.models import init_biencoder_components
 from retrievers.DPR.dpr.options import (
-    add_encoder_params,
     setup_args_gpu,
     set_encoder_params_from_state,
-    add_tokenizer_params,
-    add_cuda_params
 )
 from retrievers.DPR.dpr.utils.data_utils import read_ctxs
 from retrievers.DPR.dpr.utils.model_utils import (
@@ -24,14 +20,13 @@ from retrievers.DPR.dpr.indexer.faiss_indexers import (
     DenseHNSWFlatIndexer,
     DenseFlatIndexer
 )
-from retrievers.DPR.dense_retriever import DenseRetriever, validate, save_results
+from dense_retriever import DenseRetriever, validate, save_results
 
-from generators.fusion_in_decoder.fid.options import Options
 from generators.fusion_in_decoder.fid.data import set_data, Collator
 from generators.fusion_in_decoder.fid.slurm import init_distributed_mode, init_signal_handler
 from transformers import T5Tokenizer
 from generators.fusion_in_decoder.fid.model import FiDT5
-from generators.fusion_in_decoder.test_generator import evaluate
+from test_generator import evaluate
 
 from argparse import Namespace
 
@@ -191,7 +186,9 @@ class FiDPipeline:
         self.match = 'string'
         self.n_docs = 100
 
-        self.passages_file = passages_file
+        self.all_passages = read_ctxs(passages_file, return_dict=True)
+        if len(self.all_passages) == 0:
+            raise RuntimeError('No passages data found. Please specify ctx_file param properly.')
 
         # reader
         self.reader_base_model = "sonoisa/t5-base-japanese"
@@ -202,7 +199,6 @@ class FiDPipeline:
         # reader args
         self.threshold_probability = 85.0
         self.text_maxlength = reader_args.text_maxlength
-        # self.eval_data = reader_args.eval_data
         self.n_context = reader_args.n_context
         self.global_rank = reader_args.global_rank
         self.world_size = reader_args.world_size
@@ -225,16 +221,11 @@ class FiDPipeline:
         questions_tensor = self.retriever_module.generate_question_vectors([question])
         top_ids_and_scores = self.retriever_module.get_top_docs(questions_tensor.numpy(), self.n_docs)
 
-        all_passages = read_ctxs(self.passages_file, return_dict=True)
-
-        if len(all_passages) == 0:
-            raise RuntimeError('No passages data found. Please specify ctx_file param properly.')
-
-        questions_doc_hits = validate(all_passages, [[]], top_ids_and_scores, self.validation_workers,
+        questions_doc_hits = validate(self.all_passages, [[]], top_ids_and_scores, self.validation_workers,
                                       self.match, self.retriever_tokenizer, fo_acc=None)
 
         retrieved_data = save_results(
-            all_passages, [qid], [str(position)], [question], [[]], top_ids_and_scores, questions_doc_hits, ""
+            self.all_passages, [qid], [str(position)], [question], [[]], top_ids_and_scores, questions_doc_hits, ""
         )
 
         # transform the retrieved data

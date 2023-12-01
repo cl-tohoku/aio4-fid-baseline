@@ -102,5 +102,4 @@ COPY prepro/ /app/prepro/
 COPY retrievers/ /app/retrievers/
 COPY datasets.yml /app/.
 
-WORKDIR /app
-CMD ["uvicorn", "prediction_api:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "prediction_api:app", "--host", "0.0.0.0", "--port", "8000"]

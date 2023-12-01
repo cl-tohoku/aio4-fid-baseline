@@ -165,8 +165,8 @@ $ bash scripts/download_data.sh $datasets_dir
 
 | データ      | ファイル名                                    |    質問数 |       文書数 |
 |:---------|:-----------------------------------------|-------:|----------:|
-| DPR訓練用   | aio\_01\_train                           | 17,735 |         - |
-| 開発       | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
+| 訓練用      | aio\_01\_train                           | 17,735 |         - |
+| 開発用      | aio\_04\_dev\_v1.0.jsonl                 |    500 |         - |
 | リーダーボード用 | aio\_04\_test\_lb\_unlabeled\_v1.0.jsonl |    500 |         - |
 | 文書集合     | jawiki-20220404-c400-large               |      - | 4,288,199 |
 
@@ -254,9 +254,9 @@ DprRetrieved:
   path: JaqketAIO.load_jaqketaio2
   class: JaqketAIO
   data:
-#   train: retrievers/DPR/result/baseline/retrieved/train_aio_pt.json
-    dev: retrievers/DPR/result/baseline/retrieved/dev_aio_pt.json
-#   test: retrievers/DPR/result/baseline/retrieved/test_aio_pt.json
+#   train: retrievers/DPR/results/baseline/retrieved/train_aio_pt.json
+    dev: retrievers/DPR/results/baseline/retrieved/dev_aio_pt.json
+#   test: retrievers/DPR/results/baseline/retrieved/test_aio_pt.json
 ```
 
 Retriever で訓練データやリーダーボード用データに対する関連文書抽出を行った場合は，上記ファイル内で`train` や `test` に対応する項目も設定して下さい。
@@ -277,7 +277,7 @@ $ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder
 
 ### 形式
 以下のインスタンスからなる JSONL ファイルを使用します。
-なお、評価データを用いる際は答えが含まれていないため、`target`は空文字列となります。
+なお、評価データを用いる際は答えが含まれていないため、`answers`および`target`は空となります。
 
 ```json
 {
@@ -344,7 +344,7 @@ $ vim configs/test_generator.yml
 $ cd /app
 
 # 実行例
-$ bash generators/fusion_in_decoder/scripts/test_generator.sh configs/test_generator.yml
+$ bash generators/fusion_in_decoder/scripts/test_generator.sh generators/fusion_in_decoder/configs/test_generator.yml
 
 # 実行結果
 $ ls ${checkpoint_dir}/${name}
@@ -355,10 +355,10 @@ $ ls ${checkpoint_dir}/${name}
 ```bash
 # 例
 $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
-{"qid": "AIO04-0001", "position": 1, "prediction": null}
-{"qid": "AIO04-0001", "position": 2, "prediction": null}
-{"qid": "AIO04-0001", "position": 3, "prediction": null}
-{"qid": "AIO04-0001", "position": 4, "prediction": null}
+{"qid": "AIO04-0001", "position": 1, "prediction": None}
+{"qid": "AIO04-0001", "position": 2, "prediction": None}
+{"qid": "AIO04-0001", "position": 3, "prediction": None}
+{"qid": "AIO04-0001", "position": 4, "prediction": None}
 {"qid": "AIO04-0001", "position": 5, "prediction": "終戦"}
 ```
 
@@ -367,10 +367,9 @@ $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
 早押し設定に対応した評価スクリプト`compute_score.py`を実行し、評価を行います。
 
 ```bash
-$ cd ../../
 $ python compute_score.py \
       --prediction_file ${checkpoint_dir}/${name}/final_output.jsonl \
-      --gold_file retrievers/DPR/datasets/aio4/aio_04_dev_v1.0.jsonl \
+      --gold_file retrievers/DPR/datasets/aio_04_dev_v1.0.jsonl \
       --limit_num_wrong_answers 3
 ```
 
@@ -406,32 +405,59 @@ $ python compute_score.py \
 
 ### Dockerを用いた最終提出の準備
 
-- まず、以下の手順を参考にDockerコンテナを起動します。
+- Docker コンテナの内側にいる状態の場合は、一度コンテナを停止します。
+```bash
+# コンテナを停止する
+$ exit
+```
+
+- コンテナの外にいる状態で、[Dockerfile](Dockerfile) の内容を変更します。
 ```bash
 # "aio4-fid-baseline"ディレクトリに移動する
 $ cd {path_of_the_cloned_directory}/aio4-fid-baseline
-$ mkdir data
+$ vim Dockerfile
+```
+- Dockerfile の末尾でコメントアウトされている `CMD` を有効にします。
+```bash
+CMD ["uvicorn", "prediction_api:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+- Dockerfile の書き換えが完了したら、以下の手順を参考にDockerコンテナを起動します。
+```bash
 # Docker イメージのビルド
-$ docker image build --tag aio4_fid:latest .
+$ docker image build --tag aio4_fid:api .
+
+# コンテナの起動
 $ docker container run \
       --name fid_baseline \
       --rm \
-      --interactive \
-      --tty \
       --gpus all \
       --publish 8000:8000 \
       --mount type=bind,src=$(pwd),dst=/app \
-      aio4_fid:latest \
-      bash
+      aio4_fid:api
 ```
 
--次に、第4回AI王のリーダーボード用データに対して、下記のコマンドで解答ファイルが生成できることを確認します。
+- 次に、上記コンテナを起動した端末のウィンドウとは別のウィンドウを開きます。
+- 別のウィンドウ上で、第4回AI王のリーダーボード用データに対して、下記のコマンドで解答ファイルが生成できることを確認します。
 ```bash
+# clone した "aio4-fid-baseline" ディレクトリに移動する
+$ cd {path_of_the_cloned_directory}/aio4-fid-baseline
+
+# リーダーボード用データを移動させる
+$ mkdir data
+$ mv retrievers/DPR/datasets/aio_04_test_lb_unlabeled_v1.0.jsonl data/.
+
+# 実行例
 $ python3 -m evaluate_docker_api \
   --test_unlabelded_file data/aio_04_test_lb_unlabeled_v1.0.jsonl \
   --output_prediction_file work/aio_04_test_lb_prediction_v1.0.jsonl
 ```
 
+- `--output_prediction_file`で指定したファイルが生成されていることを確認します。
+```bash
+$ ls work
+    aio_04_test_lb_prediction_v1.0.jsonl
+```
 
 
 ## 謝辞・ライセンス

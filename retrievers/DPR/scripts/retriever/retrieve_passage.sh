@@ -23,7 +23,7 @@ test "${FLG_T}" != "TRUE" && (echo ${USAGE} && exit 1)
 # Retrieve Passages ======================================
 
 set -ex
-source scripts/configs/config.pth
+source retrievers/DPR/scripts/configs/config.pth
 
 DIR_PROJECT=$DIR_RESULT/$NAME
 mkdir -p $DIR_PROJECT/retrieved
