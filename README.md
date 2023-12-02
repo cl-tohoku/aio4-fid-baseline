@@ -143,9 +143,8 @@ $ docker container run \
 <br>
 
 ```bash
-$ cd retrievers/DPR
-$ datasets_dir="datasets"
-$ bash scripts/download_data.sh $datasets_dir
+$ datasets_dir="retrievers/DPR/datasets"
+$ bash retrievers/DPR/scripts/download_data.sh $datasets_dir
 ```
 
 ```bash
@@ -181,7 +180,7 @@ $ bash scripts/download_data.sh $datasets_dir
 
 ```bash
 # 学習済みRetriever(DPR)・文書エンベッディングのダウンロードを行った場合
-$ du -h models/baseline/*
+$ du -h retrievers/DPR/models/baseline/*
   2.5G    biencoder.pt
   13G     embedding.pickle
 ```
@@ -194,7 +193,7 @@ $ du -h models/baseline/*
 #### 設定
 
 ```bash
-$ vim scripts/configs/config.pth
+$ vim retrievers/DPR/scripts/configs/config.pth
 ```
 
 - データセットやモデルを任意の場所に保存した方は、上記設定ファイルに以下の項目を設定してください。
@@ -209,9 +208,6 @@ $ vim scripts/configs/config.pth
 なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x3）では、第4回開発データに対する関連文書の抽出に1時間弱を要しました。
 
 ```bash
-# ディレクトリの移動
-$ cd /app
-
 # 実行例
 $ exp_name="baseline"
 $ model="retrievers/DPR/models/baseline/biencoder.pt"
@@ -298,10 +294,6 @@ $ python prepro/convert_dataset.py DprRetrieved fusion_in_decoder
 ```
 
 ## Reader による解答生成と評価
-はじめに、下記ディレクトリに移動して下さい。
-```bash
-$ cd generators/fusion_in_decoder
-```
 
 ### FiDモデルについて
 - [学習済みモデルのダウンロード](#学習済みモデルのダウンロード)節で既に学習済みReader(FiD)のダウンロードを行った場合は、既にモデルの準備が完了しているため、この節はスキップしてください。
@@ -309,7 +301,7 @@ $ cd generators/fusion_in_decoder
 
 ```bash
 # 学習済みReader(FiD)のダウンロードを行った場合
-$ du -h models_and_results/baseline/*
+$ du -h generators/fusion_in_decoder/models_and_results/baseline/*
   4.0K       config.json
   1.7G       optimizer.pth.tar
   851M       pytorch_model.bin
@@ -321,7 +313,7 @@ $ du -h models_and_results/baseline/*
 #### 設定
 
 ```bash
-$ vim configs/test_generator.yml
+$ vim generators/fusion_in_decoder/configs/test_generator.yml
 ```
 
 - データセットなどを任意の場所に保存した方は、上記設定ファイルに以下の項目を設定して下さい。
@@ -342,9 +334,6 @@ $ vim configs/test_generator.yml
 なお、運営の実行環境（NVIDIA GeForce GTX 1080 Ti x1）では、第4回開発データに対する解答の生成に約6時間半を要しました。
 
 ```bash
-# ディレクトリの移動
-$ cd /app
-
 # 実行例
 $ bash generators/fusion_in_decoder/scripts/test_generator.sh generators/fusion_in_decoder/configs/test_generator.yml
 
@@ -366,7 +355,7 @@ $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
 
 #### 評価
 
-早押し設定に対応した評価スクリプト`compute_score.py`を実行し、評価を行います。
+早押し設定に対応した評価スクリプト`compute_score.py`を実行し、開発データに対する生成結果の評価を行います。
 
 ```bash
 $ python compute_score.py \
