@@ -81,7 +81,7 @@ def evaluate(args, dataset, collator, tokenizer, model):
             for bix, output in enumerate(outputs.sequences):
                 logger.info(f"qid: {dataset.data[qids[bix]]['id']}, "
                             f"position: {dataset.data[qids[bix]]['position']}, "
-                            f"pred_candidate: {tokenizer.decode(output, skip_special_tokens=True)}, "
+                            f"pred_candidate: {str(tokenizer.decode(output, skip_special_tokens=True))}, "
                             f"sequences_prob: {torch.exp(outputs.sequences_scores[bix]) * 100}"
                             )
 
@@ -89,7 +89,7 @@ def evaluate(args, dataset, collator, tokenizer, model):
                 if (torch.exp(outputs.sequences_scores[bix])*100 < args.threshold_probability) or (not tokenizer.decode(output, skip_special_tokens=True)):
                     pred = None
                 else:
-                    pred = tokenizer.decode(output, skip_special_tokens=True)
+                    pred = str(tokenizer.decode(output, skip_special_tokens=True))
 
                 reader_prediction = {"pred_answer": pred, "score": torch.exp(outputs.sequences_scores[bix])*100}
 
