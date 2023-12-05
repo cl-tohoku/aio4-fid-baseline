@@ -346,11 +346,11 @@ $ ls ${checkpoint_dir}/${name}
 ```bash
 # 例
 $ head -n 5 ${checkpoint_dir}/${name}/final_output.jsonl
-{"qid": "AIO04-0001", "position": 1, "prediction": None}
-{"qid": "AIO04-0001", "position": 2, "prediction": None}
-{"qid": "AIO04-0001", "position": 3, "prediction": None}
-{"qid": "AIO04-0001", "position": 4, "prediction": None}
-{"qid": "AIO04-0001", "position": 5, "prediction": "終戦"}
+{"qid": "AIO04-0001", "position": 1, "prediction": null, "generated": "2", "score": 75.48603415489197}
+{"qid": "AIO04-0001", "position": 2, "prediction": null, "generated": "", "score": 85.75647473335266}
+{"qid": "AIO04-0001", "position": 3, "prediction": null, "generated": "ローマ", "score": 55.69896697998047}
+{"qid": "AIO04-0001", "position": 4, "prediction": null, "generated": "広島", "score": 80.89383840560913}
+{"qid": "AIO04-0001", "position": 5, "prediction": "終戦", "generated": "終戦", "score": 95.80135345458984}
 ```
 
 #### 評価
@@ -430,6 +430,7 @@ $ docker container run \
 
 - 次に、上記コンテナを起動した端末のウィンドウとは別のウィンドウを開きます。
 - 別のウィンドウ上で、第4回AI王のリーダーボード用データに対して、下記のコマンドで解答ファイルが生成できることを確認します。
+  - なお、reader が早押しボタンを押すための、解答候補の生成確率に対する閾値は、`prediction_api.py` 内の `THRESHOLD_PROBABILITY` で設定が可能です。
 ```bash
 # clone した "aio4-fid-baseline" ディレクトリに移動する
 $ cd {path_of_the_cloned_directory}/aio4-fid-baseline

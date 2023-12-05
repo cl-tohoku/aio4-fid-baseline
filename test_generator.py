@@ -8,6 +8,7 @@ from datetime import datetime as dt
 import logging
 from pathlib import Path
 import sys
+import json
 
 import numpy as np
 
@@ -79,29 +80,38 @@ def evaluate(args, dataset, collator, tokenizer, model):
                 crossattention_scores = model.get_crossattention_scores(passage_masks.cuda())
 
             for bix, output in enumerate(outputs.sequences):
-                logger.info(f"qid: {dataset.data[qids[bix]]['id']}, "
-                            f"position: {dataset.data[qids[bix]]['position']}, "
-                            f"pred_candidate: {str(tokenizer.decode(output, skip_special_tokens=True))}, "
-                            f"sequences_prob: {torch.exp(outputs.sequences_scores[bix]) * 100}"
-                            )
+                logger.info(
+                    f"qid: {dataset.data[qids[bix]]['id']}, "
+                    f"position: {dataset.data[qids[bix]]['position']}, "
+                    f"pred_candidate: {tokenizer.decode(output, skip_special_tokens=True)}, "
+                    f"sequences_prob: {torch.exp(outputs.sequences_scores[bix]) * 100}"
+                )
 
                 # 文生成スコアから算出される生成確率が事前に設定した閾値以下である、または空文字が解答候補の場合は"None"にする
                 if (torch.exp(outputs.sequences_scores[bix])*100 < args.threshold_probability) or (not tokenizer.decode(output, skip_special_tokens=True)):
                     pred = None
                 else:
-                    pred = str(tokenizer.decode(output, skip_special_tokens=True))
-
-                reader_prediction = {"pred_answer": pred, "score": torch.exp(outputs.sequences_scores[bix])*100}
+                    pred = tokenizer.decode(output, skip_special_tokens=True)
 
                 example = dataset.data[qids[bix]]
                 if "answers" in example:
                     eval_em.append(calc_em(pred, example["answers"]))
                 total += 1
 
+                reader_prediction = {
+                    "qid": str(example["id"]),
+                    "position": example["position"],
+                    "prediction": pred,
+                    "generated": tokenizer.decode(output, skip_special_tokens=True),
+                    "score": torch.exp(outputs.sequences_scores[bix]).item() * 100
+                }
+
                 if args.write_results:
-                    fw.write(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}\n')
+                    print(json.dumps(reader_prediction, ensure_ascii=False), file=fw)
+                    # fw.write(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}\n')
                 else:
-                    print(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}')
+                    print(json.dumps(reader_prediction, ensure_ascii=False))
+                    # print(f'{{"qid": "{str(example["id"])}", "position": {example["position"]}, "prediction": {pred}}}')
                 if args.write_crossattention_scores:
                     for j in range(passage_ids.size(1)):
                         example["ctxs"][j]["score"] = crossattention_scores[bix, j].item()

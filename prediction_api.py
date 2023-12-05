@@ -39,6 +39,7 @@ BIENCODER_CKPT_FILE = "retrievers/DPR/models/baseline/biencoder.pt"
 READER_CKPT_DIR = "generators/fusion_in_decoder/models_and_results/baseline"
 PASSAGE_EMBEDDINGS_FILE = "retrievers/DPR/models/baseline/embedding.pickle"
 PASSAGES_FILE = "retrievers/DPR/datasets/wiki/jawiki-20220404-c400-large.tsv.gz"
+THRESHOLD_PROBABILITY = 85.0
 
 
 def create_args():
@@ -176,6 +177,7 @@ class FiDPipeline:
         passage_embeddings_file: str,
         passages_file: str,
         device: str = "cuda",
+        threshold_probability: float = 85.0,
     ):
         # retriever
         retriever, retriever_tokenizer = load_retriever(biencoder_ckpt_file, passage_embeddings_file)
@@ -197,7 +199,7 @@ class FiDPipeline:
         self.reader_tokenizer = reader_tokenizer
 
         # reader args
-        self.threshold_probability = 85.0
+        self.threshold_probability = threshold_probability
         self.text_maxlength = reader_args.text_maxlength
         self.n_context = reader_args.n_context
         self.global_rank = reader_args.global_rank
@@ -206,7 +208,9 @@ class FiDPipeline:
         self.num_workers = reader_args.num_workers
         self.write_crossattention_scores = False
         self.write_results = False
-        self.eval_print_freq = 100000
+        self.n_context = 60
+        self.text_maxlength = 250
+        self.eval_print_freq = 2000
         self.is_distributed = reader_args.is_distributed
         self.global_rank = reader_args.global_rank
 
@@ -254,7 +258,7 @@ class FiDPipeline:
             self.reader_tokenizer, self.reader_predict_module
         )
 
-        return {"pred_answer": reader_prediction["pred_answer"], "score": reader_prediction["score"]}
+        return {"prediction_answer": reader_prediction["prediction"], "score": reader_prediction["score"]}
 
 
 if torch.cuda.is_available():
@@ -269,6 +273,7 @@ pipeline = FiDPipeline(
     passage_embeddings_file=PASSAGE_EMBEDDINGS_FILE,
     passages_file=PASSAGES_FILE,
     device=device,
+    threshold_probability=THRESHOLD_PROBABILITY,
 )
 logger.info("Finished loading FiDPipeline")
 
@@ -277,4 +282,4 @@ app = FastAPI()
 @app.get("/answer")
 def answer(qid: str, position: int, question: str):
     prediction = pipeline.predict_answer(qid, position, question)
-    return {"prediction": prediction["pred_answer"]}
+    return {"prediction": prediction["prediction_answer"]}
