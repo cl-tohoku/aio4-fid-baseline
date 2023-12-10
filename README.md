@@ -5,6 +5,7 @@
 ## 更新履歴
 - 2023/09/15: 本ベースラインを公開しました。
 - 2023/12/01: 最終投稿方法（API利用）に対応しました。
+- 2023/12/06: 最終投稿方法（API利用）に関するエラーを修正しました。
 
 
 ## 目次
@@ -79,6 +80,8 @@ $ cd aio4-fid-baseline
   - fusion_in_decoder/:                FiD モジュール
   
 - download_models.sh:                  学習済みモデルのダウンロードスクリプト
+- dense_retriever.py:                  DPR モジュールの実行スクリプト
+- test_generator.py:                   FiD モジュールの実行スクリプト
 - compute_score.py:                    評価スクリプト
 - evaluate_docker_api.py:              最終提出時に用いる評価スクリプト
 - prediction_api.py:                   最終提出時に用いる予測スクリプト
